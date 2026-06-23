@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drogues d'Anesthésie & Procédures d'Urgence</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #181e2e;
+    --border: #232b3e;
+    --accent: #4f8ef7;
+    --text: #e8eaf2;
+    --text2: #8b93a8;
+    --text3: #555f78;
+  }
+
+  * { box-shrink: 0; box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  header {
+    background: linear-gradient(135deg, #0d1626 0%, #111d35 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 28px 16px;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .logo { width: 36px; height: 36px; background: #e05c7a; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .header-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
+  .header-sub { font-size: 11px; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* SEARCH & TOGGLE VIA TABS */
+  .search-wrap { position: relative; margin-bottom: 14px; }
+  .search-wrap input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px 10px 38px; color: var(--text); font-size: 14px; outline: none;
+  }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
+
+  .view-tabs { display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .tab-btn { background: none; border: none; color: var(--text2); font-size: 14px; font-weight: 600; padding: 6px 12px; cursor: pointer; border-radius: 6px; }
+  .tab-btn.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+  .filters { display: flex; gap: 8px; padding: 14px 28px 0; overflow-x: auto; scrollbar-width: none; }
+  .filter-btn { flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: var(--text2); cursor: pointer; }
+  .filter-btn.active, .filter-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; padding: 20px 28px 40px; }
+  
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; cursor: pointer; border-top: 3px solid var(--c, #4f8ef7); transition: all 0.15s; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  .card-header { padding: 16px 18px 12px; display: flex; justify-content: space-between; gap: 10px; }
+  .card-name { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; }
+  .card-molecule { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .badge { font-size: 10px; font-weight: 600; padding: 4px 9px; border-radius: 20px; text-transform: uppercase; background: rgba(255,255,255,0.05); color: var(--text2); }
+  .card-body { padding: 0 18px 16px; }
+  .card-desc { font-size: 13px; color: var(--text2); line-height: 1.5; margin-bottom: 12px; }
+  
+  /* CATEGORIES COLORS */
+  .cat-vasopresseur { --c: #e05c7a; }
+  .cat-hypnotique   { --c: #7b68ee; }
+  .cat-curare       { --c: #ff4500; }
+  .cat-morphinique  { --c: #da70d6; }
+  .cat-antibiotique { --c: #4f8ef7; }
+  .cat-antalgique   { --c: #7dd4c0; }
+  .cat-protocoles   { --c: #ffbc42; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 650px; max-height: 85vh; overflow-y: auto; padding: 24px; position: relative; }
+  .section { margin-bottom: 18px; }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .section p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+  
+  .steps-list { list-style: none; }
+  .steps-list li { background: var(--surface2); border-left: 3px solid var(--c, #4f8ef7); padding: 10px 12px; margin-bottom: 6px; border-radius: 0 8px 8px 0; font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .close-btn { display: block; width: 100%; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-weight: 600; cursor: pointer; text-align: center; margin-top: 15px; }
+
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; padding: 10px; } header { padding: 15px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo">🚨</div>
+    <div>
+      <div class="header-title">Référentiel d'Anesthésie & Urgences</div>
+      <div class="header-sub">Drogues du bloc & Protocoles de réanimation</div>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Rechercher drogue, complication, algorithme..." oninput="filterData()">
+  </div>
+  <div class="view-tabs">
+    <button class="tab-btn active" id="tab-drugs" onclick="switchView('drugs')">💊 Médicaments</button>
+    <button class="tab-btn" id="tab-crises" onclick="switchView('crises')">⚡ Algorithmes de Crise</button>
+  </div>
+</header>
+
+<div class="filters" id="filters"></div>
+<div class="grid" id="grid"></div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+const drugs = [
+  { name: "Adrénaline", molecule: "Épinéphrine", category: "vasopresseur", label: "Vasopresseur", icon: "🫀", comp: "1 mg/mL", mec: "Agoniste α et β-adrénergique puissant.", ind: "Arrêt cardiaque, choc anaphylactique, bronchospasme réfractaire.", dose: "ACR: 1mg IV direct / Anaphylaxie: 0,1 à 0,5mg IV titré.", voie: "IV, IM, IO", exemples: ["Arrêt cardiaque peropératoire.", "Choc anaphylactique après induction."] },
+  { name: "Propofol", molecule: "Diprivan", category: "hypnotique", label: "Hypnotique", icon: "💤", comp: "10 mg/mL ou 20 mg/mL", mec: "Modulateur positif des récepteurs GABA-A.", ind: "Induction et entretien de l'anesthésie générale, sédation.", dose: "Induction : 1,5 à 2,5 mg/kg IV.", voie: "IV direct / IVSE / AIVOC", exemples: ["Induction standard de l'adulte.", "Sédation en cours de chirurgie éveillée."] },
+  { name: "Célocurine", molecule: "Succinylcholine", category: "curare", label: "Curare Dépolarisant", icon: "⚡", comp: "50 mg/mL", mec: "Agoniste des récepteurs nicotiniques (bloc dépolarisant).", ind: "Induction en séquence rapide (estomac plein), intubation difficile prévue.", dose: "1 à 1,5 mg/kg IV direct.", voie: "IV direct (Conserver au frais)", exemples: ["RSI (Rapid Sequence Induction) pour occlusion intestinale."] },
+  { name: "Esmeron", molecule: "Rocuronium", category: "curare", label: "Curare Non-Dépolarisant", icon: "⛓️", comp: "10 mg/mL", mec: "Antagoniste compétitif des récepteurs nicotiniques.", ind: "Curarisation pour intubation et entretien du bloc neuromusculaire.", dose: "Intubation : 0,6 mg/kg (RSI : 1,2 mg/kg).", voie: "IV, IVSE", exemples: ["Alternative à la Célocurine si contre-indication (hyperkaliémie)."] },
+  { name: "Nimbex", molecule: "Cisatracurium", category: "curare", label: "Curare Non-Dépolarisant", icon: "⛓️", comp: "2 mg/mL", mec: "Antagoniste compétitif. Élimination d'Hofmann (indépendante du foie/rein).", ind: "Curarisation prolongée au bloc ou en réanimation, idéal chez l'insuffisant rénal ou hépatique.", dose: "Induction : 0,15 mg/kg IV.", voie: "IV direct ou IVSE", exemples: ["Chirurgie majeure chez un insuffisant rénal chronique."] },
+  { name: "Sufentanil", molecule: "Sufenta", category: "morphinique", label: "Opioïde", icon: "💧", comp: "5 µg/mL", mec: "Agoniste pur et sélectif des récepteurs opioïdes µ (Morphinique majeur).", ind: "Analgésie peropératoire forte au bloc et sédation en réanimation.", dose: "Induction : 0,1 à 0,3 µg/kg IV.", voie: "IV, Péridurale", exemples: ["Induction et entretien analgésique d'une chirurgie cardiaque ou digestive."] },
+  { name: "Bridion", molecule: "Sugammadex", category: "antalgique", label: "Antagoniste Curares", icon: "🔄", comp: "100 mg/mL", mec: "Encapsulation sélective du Rocuronium ou Vécuronium dans le sang.", ind: "Décurarisation rapide au bloc, inversion immédiate en cas de 'No Intubation No Ventilation'.", dose: "Routine : 2 à 4 mg/kg. Urgence (après 1,2mg/kg Rocuronium) : 16 mg/kg.", voie: "IV bolus direct", exemples: ["Incapacité d'intuber/ventiler 2 min après induction par Rocuronium."] },
+  { name: "Éphédrine", molecule: "Éphédrine", category: "vasopresseur", label: "Vasopresseur", icon: "📈", comp: "3 mg/mL (prêt à l'emploi)", mec: "Sympathomimétique indirect (libère la noradrénaline endogène).", ind: "Hypotension artérielle suite à une rachianesthésie ou induction.", dose: "3 à 9 mg IV en bolus à renouveler.", voie: "IV direct", exemples: ["Chute tensionnelle modérée post-péridurale en obstétrique."] }
+];
+
+const crises = [
+  {
+    name: "Arrêt Cardio-Respiratoire (ACR)",
+    complication: "Asystolie / FV / TV sans pouls",
+    category: "protocoles",
+    label: "Urgence Vitale",
+    icon: "🛑",
+    desc: "Procédure universelle de réanimation cardio-pulmonaire (RCP) au bloc opératoire.",
+    etapes: [
+      "Reconnaissance immédiate : Demander de l'aide, noter l'heure, arrêter les agents d'anesthésie halogénés (vapeurs).",
+      "Masser : Débuter les compressions thoraciques immédiates (100-120/min), plan dur, relâcher complètement.",
+      "Ventiler : FiO2 100%, vérifier la perméabilité des voies aériennes, monitorer l'EtCO2 (objectif > 10 mmHg).",
+      "Analyser le rythme : Poser les plaques de scope/défibrillateur.",
+      "Si Rythme Chocable (FV/TV) : Délivrer 1 choc (200J biphasique), reprendre le MCE immédiatement pour 2 min sans vérifier le rythme.",
+      "Drogues : Adrénaline 1 mg IV toutes les 3 à 5 minutes. Si FV/TV persistante au 3ème choc : Amiodarone 300 mg IV direct.",
+      "Traiter les causes réversibles (4H / 4T) : Hypoxie, Hypovolémie, Hypo/Hyperkaliémie, Hypothermie / Pneumothorax sous Tension, Tamponnade, Toxiques, Thrombose."
+    ]
+  },
+  {
+    name: "Choc Anaphylactique sous AG",
+    complication: "Réaction allergique grade III/IV",
+    category: "protocoles",
+    label: "Urgence Vitale",
+    icon: "🦋",
+    desc: "Survenue brutale à l'induction (souvent curares ou antibiotiques) : collapsus cardio-vasculaire, bronchospasme, signes cutanés.",
+    etapes: [
+      "Arrêter immédiatement l'administration de l'allergène suspecté.",
+      "Appeler à l'aide, FiO2 100%, positionner le patient en Trendelenburg si hémodynamique effondrée.",
+      "Drogue clé : Adrénaline titrée selon la gravité. Grade III (collapsus) : Bolus de 10 à 20 µg IV répétés, augmenter si nécessaire.",
+      "Grade IV (Arrêt cardiaque imminent) : Bolus de 100 µg à 1 mg IV.",
+      "Remplissage vasculaire massif : Cristalloïdes isotoniques (20 à 30 mL/kg rapidement).",
+      "Bronchospasme associé : Nébulisations ou IV de Salbutamol (Ventoline).",
+      "Mesures secondaires : Corticoïdes (Solumédrol 1-2 mg/kg), Antihistaminiques. Prélever un tube de tryptasémie entre 30 min et 2h après le choc."
+    ]
+  },
+  {
+    name: "Toxicité des Anesthésiques Locaux (LAST)",
+    complication: "Injection intravasculaire accidentelle (ALR)",
+    category: "protocoles",
+    label: "Urgence Toxique",
+    icon: "❄️",
+    desc: "Surdosage ou passage systémique d'anesthésiques locaux (ex: Bupivacaïne) provoquant des signes neurologiques (crise convulsive) puis cardiaques (arrêt, troubles du rythme).",
+    etapes: [
+      "Dès les premiers signes (goût métallique, acouphènes, secousses) : Arrêter l'injection de l'anesthésique local.",
+      "Contrôle des voies aériennes : Oxygénation à 100%, hyperventiler (l'acidose aggrave la toxicité cardiovasculaire).",
+      "Contrôle des convulsions : Benzodiazépines (Midazolam 2-5 mg IV) ou Propofol à faible dose.",
+      "Traitement spécifique (Émulsion Lipidique) : Injecter l'Intralipide 20% en bolus de 1,5 mL/kg IV en 1 minute.",
+      "Poursuivre par une perfusion continue d'Intralipide 20% à la dose de 0,25 mL/kg/min.",
+      "Si arrêt cardiaque : RCP standard mais prolongée (l'Intralipide capte la drogue). Éviter la vasopressine, réduire les doses d'adrénaline (<1 µg/kg bolus)."
+    ]
+  },
+  {
+    name: "Hyperthermie Maligne (HM)",
+    complication: "Crise pharmacogénétique (Halogénés/Célocurine)",
+    category: "protocoles",
+    label: "Urgence Rare",
+    icon: "🔥",
+    desc: "Hypermétabolisme musculaire incontrôlé déclenché par les gaz halogénés ou la Célocurine. Signes : élévation majeure et précoce de l'EtCO2, tachycardie, rigidité musculaire, hyperthermie tardive.",
+    etapes: [
+      "Arrêter immédiatement les halogénés et/ou la Célocurine. Demander le chariot d'Hyperthermie Maligne.",
+      "Hyperventiler le patient à 100% d'O2 avec un débit maximal (>10 L/min) pour éliminer le CO2. Changer les filtres du circuit si possible.",
+      "Drogue antidote spécifique : DANTROLENE (Dantrium). Dose de charge : 2,5 mg/kg IV direct rapide. À répéter jusqu'à disparition des signes (jusqu'à 10 mg/kg).",
+      "Refroidissement actif du patient : perfusions glacées, glace sur les axes vasculaires, lavage gastrique froid. Arrêter dès que la température descend à 38,5°C.",
+      "Traiter l'hyperkaliémie fréquente et l'acidose : Insuline/Glucose, Bicarbonates si nécessaire. Monitorer la diurèse (risque de rhabdomyolyse)."
+    ]
+  }
+];
+
+let currentView = "drugs";
+let activeCategory = "all";
+
+function switchView(view) {
+  currentView = view;
+  document.getElementById("tab-drugs").classList.toggle("active", view === "drugs");
+  document.getElementById("tab-crises").classList.toggle("active", view === "crises");
+  activeCategory = "all";
+  renderFilters();
+  renderGrid();
+}
+
+function renderFilters() {
+  const f = document.getElementById("filters");
+  if (currentView === "crises") {
+    f.innerHTML = ""; // Pas besoin de filtres complexes pour les crises
+    return;
+  }
+  const categories = [
+    { key: "all", label: "Tous" },
+    { key: "vasopresseur", label: "Vasopresseurs" },
+    { key: "hypnotique", label: "Hypnotiques" },
+    { key: "curare", label: "Curares" },
+    { key: "morphinique", label: "Opioïdes" },
+    { key: "antalgique", label: "Antalgiques / Antidotes" }
+  ];
+  f.innerHTML = categories.map(c => `
+    <button class="filter-btn ${activeCategory === c.key ? 'active' : ''}" onclick="setCategory('${c.key}')">${c.label}</button>
+  `).join('');
+}
+
+function setCategory(k) {
+  activeCategory = k;
+  renderFilters();
+  renderGrid();
+}
+
+function filterData() {
+  renderGrid();
+}
+
+function renderGrid() {
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  const g = document.getElementById("grid");
+  g.innerHTML = "";
+
+  if (currentView === "drugs") {
+    const filtered = drugs.filter(d => {
+      const mCat = activeCategory === "all" || d.category === activeCategory;
+      const mSrc = !q || d.name.toLowerCase().includes(q) || d.molecule.toLowerCase().includes(q) || d.ind.toLowerCase().includes(q);
+      return mCat && mSrc;
+    });
+
+    if(!filtered.length) { g.innerHTML = "<div class='empty'>Aucune drogue trouvée.</div>"; return; }
+    g.innerHTML = filtered.map(d => `
+      <div class="card cat-${d.category}" onclick="openDrugModal(${drugs.indexOf(d)})">
+        <div class="card-header">
+          <div><div class="card-name">${d.icon} ${d.name}</div><div class="card-molecule">${d.molecule}</div></div>
+          <span class="badge">${d.label}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-desc">${d.ind}</div>
+          <div style="font-size:11px; color:var(--text3)">${d.voie} • ${d.comp}</div>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    const filtered = crises.filter(c => !q || c.name.toLowerCase().includes(q) || c.complication.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q));
+    if(!filtered.length) { g.innerHTML = "<div class='empty'>Aucun protocole trouvé.</div>"; return; }
+    g.innerHTML = filtered.map(c => `
+      <div class="card cat-protocoles" onclick="openCriseModal(${crises.indexOf(c)})">
+        <div class="card-header">
+          <div><div class="card-name">${c.icon} ${c.name}</div><div class="card-molecule">${c.complication}</div></div>
+          <span class="badge" style="color:#ffbc42;">🚨 URGENCE</span>
+        </div>
+        <div class="card-body">
+          <div class="card-desc">${c.desc}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function openDrugModal(idx) {
+  const d = drugs[idx];
+  const m = document.getElementById("modalContent");
+  m.innerHTML = `
+    <div class="section"><h2 style="font-family:'Space Grotesk'">${d.icon} ${d.name} (${d.molecule})</h2></div>
+    <div class="section"><div class="section-title">Présentation / Composition</div><p>${d.comp}</p></div>
+    <div class="section"><div class="section-title">Mécanisme</div><p>${d.mec}</p></div>
+    <div class="section"><div class="section-title">Posologie & Voie</div><p><b>${d.voie}</b> : ${d.dose}</p></div>
+    <div class="section"><div class="section-title">Exemples</div>
+      <ul class="steps-list" style="--c:var(--accent)">${d.exemples.map(e => `<li>${e}</li>`).join('')}</ul>
+    </div>
+    <button class="close-btn" onclick="closeModalBtn()">Fermer</button>
+  `;
+  document.getElementById("modalOverlay").classList.add("open");
+}
+
+function openCriseModal(idx) {
+  const c = crises[idx];
+  const m = document.getElementById("modalContent");
+  m.innerHTML = `
+    <div class="section"><h2 style="font-family:'Space Grotesk'; color:#e05c7a;">🚨 ${c.name}</h2><p style="font-size:12px; color:var(--text2);">${c.complication}</p></div>
+    <div class="section"><div class="section-title">Description de la crise</div><p>${c.desc}</p></div>
+    <div class="section"><div class="section-title">Conduite à tenir immédiate (Algorithme)</div>
+      <ul class="steps-list" style="--c:#e05c7a">${c.etapes.map(e => `<li>${e}</li>`).join('')}</ul>
+    </div>
+    <button class="close-btn" onclick="closeModalBtn()">Fermer</button>
+  `;
+  document.getElementById("modalOverlay").classList.add("open");
+}
+
+function closeModal(e) { if (e.target === document.getElementById("modalOverlay")) closeModalBtn(); }
+function closeModalBtn() { document.getElementById("modalOverlay").classList.remove("open"); }
+
+renderFilters();
+renderGrid();
+</script>
+</body>
+</html>
